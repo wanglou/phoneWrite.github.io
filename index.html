@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>手写签名</title>
+	<style type="text/css">
+		body {
+			margin: 0;
+			font-size: 10px;
+		}
+		#myCanvas{
+		}
+		/* 签署按钮 */
+		.sign {
+			display: block;
+			margin: 5rem auto;
+			width: 5rem;
+			height: 2rem;
+			line-height: 2rem;
+			text-align: center;
+			background: #2768DC;
+			font-size: 1rem;
+			border-radius: 5px;
+			color: #fff;
+		}
+		.dialog {
+			/* display: none; */
+			position: absolute;
+			top: 100%;
+			bottom: 0;
+			width: 100%;
+			transition: all .1s;
+			background: rgba(211,211,211, 0.5);
+			z-index: 101;
+		}
+		.dialog .container {
+			position: absolute;
+			background: #fff;
+			width: 100%;
+			height: 70%;
+			margin: 0 auto 0;
+		}
+		.dialog .container p {
+			width: 90%;
+			height: 2.5rem;
+			font-size: 1rem;
+			border-radius: 5px;
+			margin: 10px auto;
+			line-height: 2.5rem;
+			text-align: center;
+			background: #2768DC;
+			color: #fff;
+		}
+		.dialog .container p:nth-child(2) {
+			background: #F56C6C;
+		}
+		.dialog .container p:nth-child(2):active {
+			background: #F7A5A5;
+		}
+		.dialog .container p:active {
+			background: #6295F5;
+		}
+	</style>
+</head>
+<body>
+	<span class="sign" onclick="sign()">签署</span>
+	<div class="dialog">
+		<div class="container">
+			<canvas id= 'myCanvas'>
+				浏览器不支持
+			</canvas>
+			<p onclick="handleClear()"> 清除 </p>
+			<p onclick="handleFinish()"> 完成 </p>
+		</div>
+	</div>
+	<div id="image"></div>
+</body>
+<script src="./js/jquery-1.11.3.min.js"></script>
+<script type="text/javascript">
+	document.body.addEventListener('touchmove', function (e) {
+    e.preventDefault()
+  }, {
+    passive: false
+  })
+	function sign () {
+		// $('.dialog').show()
+		$('.dialog').css('top', '0')
+	}
+	var canvas = document.getElementById('myCanvas');
+	canvas.width = window.innerWidth
+	canvas.height = window.innerHeight * 0.7
+	var context = canvas.getContext('2d');
+	var myImg = document.querySelector('#image');
+	var lastTime = 0;
+	canvas.ontouchstart = function(e){
+		var ev = e || window.event;
+		var x = e.changedTouches[0].clientX - canvas.offsetLeft;
+		var y = e.changedTouches[0].clientY - canvas.offsetTop;
+		context.beginPath();
+		context.strokeStyle = '#F8A8AF';
+		context.lineWidth = 2;
+		context.moveTo(x,y);
+		canvas.ontouchmove = function(e){
+			var ev = e || window.event;
+			var x = e.changedTouches[0].clientX - canvas.offsetLeft;
+			var y = e.changedTouches[0].clientY - canvas.offsetTop;
+			context.lineTo(x,y);
+			context.stroke();
+		}
+		canvas.ontouchend = function(){
+			canvas.ontouchmove = '';
+			lastTime = new Date().getTime();
+		}
+	}
+	// 擦除文字
+	function handleClear(){
+		//第一种方法擦除（clearRect方法）
+		context.clearRect(0,0,canvas.width,canvas.height);
+		//第二种方法擦除（重新设置高宽度）
+		// canvas.width='100%';
+		// canvas.height='100%';
+		myImg.querySelector('img').remove();
+	}
+	// 完成
+	function handleFinish(){
+		convertCanvasToImage(canvas);
+		// $('.dialog').hide()
+		$('.dialog').css('top', '100%')
+	}
+	// canvas转成图片
+	function convertCanvasToImage(canvas) {
+		var image = new Image();
+		image.src = canvas.toDataURL("image/png");
+		console.log(image.src);
+		if (myImg.querySelector('img')) {
+			myImg.querySelector('img').remove();
+		}
+		myImg.appendChild(image);
+	} 
+</script>
+</html>
